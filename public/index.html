@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blood Donation & Donor Finder</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- HEADER NAVBAR -->
+  <header class="header">
+    <div class="logo">LifeLine</div>
+    <div class="auth-btns" id="auth-buttons">
+      <button class="btn btn-outline" onclick="openModal('login-modal')">Donor Sign In</button>
+      <button class="btn btn-red" onclick="openModal('register-modal')">Register as Donor</button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <div class="container" id="top">
+
+    <!-- USER SESSION BAR -->
+    <div id="session-bar" class="session-bar hidden">
+      <span>Logged in as: <strong id="user-name"></strong></span>
+      <div class="session-right">
+        <label>
+          <input type="checkbox" id="avail-checkbox" onchange="toggleAvailability(this.checked)"> Available for Donation
+        </label>
+        <button class="btn btn-small" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- MAIN TWO COLUMN CARDS -->
+    <div class="cards-grid">
+
+      <!-- DONOR LIST CARD -->
+      <div id="donors-card" class="section-card">
+        <h2>Available Donors</h2>
+        <div class="filter-row">
+          <select id="search-bg">
+            <option value="">All Blood Groups</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+          </select>
+          <input type="text" id="search-loc" placeholder="Enter city/location">
+          <button class="btn btn-blue" onclick="loadDonors()">Search</button>
+        </div>
+
+        <div id="donors-list" class="list-container"></div>
+      </div>
+
+      <!-- EMERGENCY REQUESTS CARD -->
+      <div id="active-card" class="section-card">
+        <div class="card-title-row">
+          <h2>Emergency Requests</h2>
+          <button class="btn btn-red" onclick="openModal('request-modal')">+ Create Request</button>
+        </div>
+
+        <div id="requests-list" class="list-container"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div id="about-sec" class="footer-col">
+        <h3>About LifeLine</h3>
+        <p>LifeLine helps people find available blood donors quickly during medical emergencies and hospital needs.</p>
+      </div>
+      <div id="contact-sec" class="footer-col">
+        <h3>Contact Us</h3>
+        <p>Helpline: +91 98765 43210</p>
+        <p>Email: contact@lifeline.org</p>
+      </div>
+    </div>
+    <div class="footer-copy">
+      &copy; 2026 LifeLine Emergency Network
+    </div>
+  </footer>
+
+  <!-- MODAL: DONOR LOGIN -->
+  <div id="login-modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-icon" onclick="closeModal('login-modal')">&times;</span>
+      <h3>Donor Login</h3>
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="login-email" required placeholder="your.email@gmail.com">
+        </div>
+        <button type="submit" class="btn btn-blue full-width">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DONOR REGISTRATION -->
+  <div id="register-modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-icon" onclick="closeModal('register-modal')">&times;</span>
+      <h3>Register as Blood Donor</h3>
+      <form onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="reg-name" required placeholder="Name">
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="reg-email" required placeholder="Email">
+        </div>
+        <div class="form-group">
+          <label>Blood Group *</label>
+          <select id="reg-bg" required>
+            <option value="">Select Group</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Phone Number (10 Digits) *</label>
+          <input type="tel" id="reg-contact" maxlength="10" required placeholder="9876543210">
+        </div>
+        <div class="form-group">
+          <label>City / Location *</label>
+          <input type="text" id="reg-location" required placeholder="Location">
+        </div>
+        <div class="form-group">
+          <label>Notes (Optional)</label>
+          <textarea id="reg-notes" placeholder="Any health note..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-blue full-width">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NEW EMERGENCY REQUEST -->
+  <div id="request-modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-icon" onclick="closeModal('request-modal')">&times;</span>
+      <h3>New Emergency Request</h3>
+      <form onsubmit="handleCreateRequest(event)">
+        <div class="form-group">
+          <label>Patient Name *</label>
+          <input type="text" id="req-patient" required>
+        </div>
+        <div class="form-group">
+          <label>Blood Group *</label>
+          <select id="req-bg" required>
+            <option value="">Select</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Quantity (Units)</label>
+          <input type="number" id="req-qty" min="1" value="1" required>
+        </div>
+        <div class="form-group">
+          <label>Hospital *</label>
+          <input type="text" id="req-hospital" required>
+        </div>
+        <div class="form-group">
+          <label>Location *</label>
+          <input type="text" id="req-location" required>
+        </div>
+        <div class="form-group">
+          <label>Required Date & Time</label>
+          <input type="datetime-local" id="req-time" required>
+        </div>
+        <div class="form-group">
+          <label>Contact Phone (10 Digits)*</label>
+          <input type="tel" id="req-contact" maxlength="10" required>
+        </div>
+        <div class="form-group">
+          <label>Details / Description</label>
+          <textarea id="req-desc"></textarea>
+        </div>
+        <button type="submit" class="btn btn-red full-width">Post Request</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REQUEST DETAILS -->
+  <div id="details-modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-icon" onclick="closeModal('details-modal')">&times;</span>
+      <h3>Request Details</h3>
+      <div id="details-body"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
